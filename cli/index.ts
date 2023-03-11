@@ -1,8 +1,13 @@
 import { logger } from "~/utils/logger.js";
+import parseInputs from "./helpers/parseInputs.js";
+import { PKG_ROOT } from "./utils/constants.js";
 
 async function main() {
   logger.info("OATS | OpenApi spec'd Typescript Server Generator");
-  logger.disabled("CLI to generate ts based express-server stubs!");
+  logger.disabled("CLI to generate ts based express-server stubs!\n");
+
+  const data = await parseInputs();
+  console.log(JSON.stringify(data, null, 2), { PKG_ROOT });
 }
 
 main().catch((err) => {
