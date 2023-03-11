@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "module": "Node16",
+    "paths": {
+      "~/*": ["cli/*"]
+    }
+  },
+  "include": ["cli"]
+}

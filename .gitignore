@@ -1,0 +1,8 @@
+/*
+
+!/cli/
+!.gitignore
+!package*
+!*config*
+
+node_modules
