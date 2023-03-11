@@ -66,75 +66,77 @@ export default async function () {
   else cliResults.flags = program.opts();
 
   try {
-    if (!cliProvidedName) {
-      const { appName } = await inquirer.prompt<Pick<CliResults, "appName">>({
-        name: "appName",
-        type: "input",
-        message: "What will your project be called?",
-        default: defaultOptions.appName,
-        validate: validateAppName,
-        transformer: (input: string) => {
-          return input.trim();
-        },
-      });
-      cliResults.appName = appName;
-    }
-
-    if (!cliResults.flags.mongoose) {
-      const { mongoose } = await inquirer.prompt<{ mongoose: boolean }>({
-        name: "mongoose",
-        type: "confirm",
-        message: "Generate mongoose models?",
-        default: false,
-      });
-      if (!mongoose) {
-        logger.info("Skipping mongoose model generation.");
+    if (!cliResults.flags.quick && !cliResults.flags.default) {
+      if (!cliProvidedName) {
+        const { appName } = await inquirer.prompt<Pick<CliResults, "appName">>({
+          name: "appName",
+          type: "input",
+          message: "What will your project be called?",
+          default: defaultOptions.appName,
+          validate: validateAppName,
+          transformer: (input: string) => {
+            return input.trim();
+          },
+        });
+        cliResults.appName = appName;
       }
-    }
 
-    if (cliResults.flags.service !== "skip") {
-      const { service } = await inquirer.prompt<Pick<CliFlags, "service">>({
-        name: "service",
-        type: "list",
-        message: "Setup deployment script for which of the following services?",
-        choices: [
-          { name: "Google Cloud Function (HTTP)", value: "gcf_http" },
-          { name: "Google Cloud Function (Pub Sub)", value: "gcf_pub_sub" },
-          { name: "AWS Lambda", value: "aws_lambda" },
-          { name: "AWS Lambda@Edge", value: "aws_lambda_edge" },
-          { name: "Skip", value: "skip" },
-        ],
-      });
-      cliResults.flags.service = service;
-    }
-
-    // Skip if noGit flag provided
-    if (!cliResults.flags.noGit) {
-      const { git } = await inquirer.prompt<{ git: boolean }>({
-        name: "git",
-        type: "confirm",
-        message: "Initialize a new git repository?",
-        default: true,
-      });
-      if (!git) {
-        cliResults.flags.noGit = true;
-        logger.info(`You can run 'git init' later.`);
+      if (!cliResults.flags.mongoose) {
+        const { mongoose } = await inquirer.prompt<{ mongoose: boolean }>({
+          name: "mongoose",
+          type: "confirm",
+          message: "Generate mongoose models?",
+          default: false,
+        });
+        if (!mongoose) {
+          logger.info("Skipping mongoose model generation.");
+        }
       }
-    }
 
-    const pkgManager = getUserPkgManager();
+      if (cliResults.flags.service !== "skip") {
+        const { service } = await inquirer.prompt<Pick<CliFlags, "service">>({
+          name: "service",
+          type: "list",
+          message: "Setup deployment script for which of the following services?",
+          choices: [
+            { name: "Google Cloud Function (HTTP)", value: "gcf_http" },
+            { name: "Google Cloud Function (Pub Sub)", value: "gcf_pub_sub" },
+            { name: "AWS Lambda", value: "aws_lambda" },
+            { name: "AWS Lambda@Edge", value: "aws_lambda_edge" },
+            { name: "Skip", value: "skip" },
+          ],
+        });
+        cliResults.flags.service = service;
+      }
 
-    if (!cliResults.flags.noInstall) {
-      const { runInstall } = await inquirer.prompt<{ runInstall: boolean }>({
-        name: "runInstall",
-        type: "confirm",
-        message: `Would you like us to run ${pkgManager} install?`,
-        default: true,
-      });
+      // Skip if noGit flag provided
+      if (!cliResults.flags.noGit) {
+        const { git } = await inquirer.prompt<{ git: boolean }>({
+          name: "git",
+          type: "confirm",
+          message: "Initialize a new git repository?",
+          default: true,
+        });
+        if (!git) {
+          cliResults.flags.noGit = true;
+          logger.info(`You can run 'git init' later.`);
+        }
+      }
 
-      if (!runInstall) {
-        cliResults.flags.noInstall = true;
-        logger.info(`Skipping install. You can run '${pkgManager} install' later to install the dependencies!`);
+      const pkgManager = getUserPkgManager();
+
+      if (!cliResults.flags.noInstall) {
+        const { runInstall } = await inquirer.prompt<{ runInstall: boolean }>({
+          name: "runInstall",
+          type: "confirm",
+          message: `Would you like us to run ${pkgManager} install?`,
+          default: true,
+        });
+
+        if (!runInstall) {
+          cliResults.flags.noInstall = true;
+          logger.info(`Skipping install. You can run '${pkgManager} install' later to install the dependencies!`);
+        }
       }
     }
   } catch (error) {
