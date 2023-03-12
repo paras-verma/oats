@@ -5,15 +5,16 @@
   "author": "maaspiar",
   "license": "GNU3.0",
   "type": "module",
-  "main": "index.js",
-  "exports": "./index.js",
+  "main": "dist/index.js",
+  "exports": "./dist/index.js",
   "bin": {
-    "oats": "./index.js"
+    "oats": "./dist/index.js"
   },
   "engines": {
     "node": ">=14.16"
   },
   "dependencies": {
+    "@openapitools/openapi-generator-cli": "^2.5.2",
     "chalk": "^5.2.0",
     "commander": "^10.0.0",
     "inquirer": "^9.1.4"
