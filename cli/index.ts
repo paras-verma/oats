@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { logger } from "~/utils/logger.js";
+import generateRoutes from "./helpers/generateRoutes.js";
 import parseInputs from "./helpers/parseInputs.js";
 
 async function main() {
@@ -11,6 +12,7 @@ async function main() {
     flags: { spec },
   } = await parseInputs();
 
+  await generateRoutes(spec, appName);
   console.log({ appName, spec });
 }
 
