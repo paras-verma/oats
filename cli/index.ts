@@ -9,10 +9,11 @@ async function main() {
 
   const {
     appName,
+    appPath,
     flags: { spec },
   } = await parseInputs();
 
-  await generateRoutes(spec, appName);
+  await generateRoutes(spec, appPath);
   console.log({ appName, spec });
 }
 

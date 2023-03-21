@@ -1,7 +1,7 @@
 import { Command, Option } from "commander";
 import inquirer from "inquirer";
 import { logger } from "~/utils/logger.js";
-import { validateAppName } from "~/utils/validateAppName.js";
+import { projectFolderDetails, validateAppName } from "~/utils/validateAppName.js";
 import { defaultApiSchema, serviceOptions } from "~/utils/constants.js";
 import { getUserPkgManager } from "~/utils/getUserPkgManager.js";
 import { fileExists } from "~/utils/index.js";
@@ -19,11 +19,13 @@ interface CliFlags {
 
 interface CliResults {
   appName: string;
+  appPath: string;
   flags: CliFlags;
 }
 
 const defaultOptions: CliResults = {
   appName: "ts-express-app",
+  appPath: `${process.cwd()}/ts-express-app`,
   flags: {
     spec: undefined,
     noGit: false,
@@ -99,7 +101,7 @@ export default async function () {
       }
 
       if (!projectName) {
-        const { appName } = await inquirer.prompt<Pick<CliResults, "appName">>({
+        const { appName: input } = await inquirer.prompt<Pick<CliResults, "appName">>({
           name: "appName",
           type: "input",
           message: "What will your project be called?",
@@ -109,7 +111,9 @@ export default async function () {
             return input.trim();
           },
         });
+        const { appName, appPath } = projectFolderDetails(input);
         cliResults.appName = appName;
+        cliResults.appPath = appPath;
       }
 
       if (!cliResults.flags.mongoose) {

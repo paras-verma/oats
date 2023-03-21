@@ -6,10 +6,10 @@ import mustache from "mustache";
 import { IOpenApiSpec } from "~/interface/oas.js";
 import routeFileTemplate from "~/templates/mustache/routes.js";
 
-export default async function (specFilePath: string, appName: string) {
+export default async function (specFilePath: string, appPath: string) {
   const specFileContent = await readFile(specFilePath, { encoding: "utf-8" });
 
-  await mkdirp(`${process.cwd()}/${appName}/routes`);
+  await mkdirp(`${appPath}/routes`);
 
   const parsedSpec = load(specFileContent) as IOpenApiSpec;
   const routes = Object.entries(parsedSpec.paths)
@@ -34,6 +34,6 @@ export default async function (specFilePath: string, appName: string) {
       },
     };
     const fileContent = mustache.render(routeFileTemplate, mustachePayload);
-    await writeFile(`${process.cwd()}/${appName}/routes/${tag.name}.ts`, fileContent);
+    await writeFile(`${appPath}/routes/${tag.name}.ts`, fileContent);
   });
 }
