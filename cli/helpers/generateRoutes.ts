@@ -1,6 +1,6 @@
 import { load } from "js-yaml";
 import { readFile, writeFile } from "fs/promises";
-import mkdirp from "mkdirp";
+import { mkdirp } from "fs-extra";
 import mustache from "mustache";
 
 import { IOpenApiSpec } from "~/interface/oas.js";
