@@ -1,10 +1,14 @@
-import { logger } from "./logger.js";
+import { exists } from "fs-extra";
+import { resolve } from "path";
 
 const validationRegExp = /^(?:@[a-z0-9-*~][a-z0-9-*._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/;
 
 //Validate a string against allowed package.json names
 export const validateAppName = (input: string) => {
-  const paths = input.split("/");
+  const path = resolve(input);
+  const paths = path.split("/");
+
+  if (exists(path)) return `Name-collision identified at ${path} \nPlease retry with with a different app-name or abort this process before continuing...`;
 
   // If the first part is a @, it's a scoped package
   const indexOfDelimiter = paths.findIndex((p) => p.startsWith("@"));
@@ -15,11 +19,6 @@ export const validateAppName = (input: string) => {
     appName = paths.slice(indexOfDelimiter).join("/");
   }
 
-  if (input.includes("./")) {
-    logger.warn(`This package doesn't support relative urls in the path name.`);
-    logger.info(`Scaffolding ${appName} project at ${process.cwd()}/${appFolderName}`);
-  }
-
   if (validationRegExp.test(appName ?? "")) {
     return true;
   } else {
@@ -28,7 +27,8 @@ export const validateAppName = (input: string) => {
 };
 
 export const projectFolderDetails = (name: string) => {
-  const paths = name.split("/");
+  const absolutePath = resolve(name);
+  const paths = absolutePath.split("/");
 
   // If the first part is a @, it's a scoped package
   const indexOfDelimiter = paths.findIndex((p) => p.startsWith("@"));

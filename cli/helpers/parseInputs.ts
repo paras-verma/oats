@@ -68,7 +68,9 @@ export default async function () {
   // Needs to be separated outside the if statement to correctly infer the type as string | undefined
   const projectName = program.args[0];
   if (projectName) {
-    cliResults.appName = projectName;
+    const { appName, appPath } = projectFolderDetails(projectName);
+    cliResults.appName = appName;
+    cliResults.appPath = appPath;
   }
 
   // only consider flags if cli isn't running in default mode
