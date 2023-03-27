@@ -2,6 +2,7 @@
 import { logger } from "~/utils/logger.js";
 import generateRoutes from "./helpers/generateRoutes.js";
 import parseInputs from "./helpers/parseInputs.js";
+import scaffoldProjectRoot from "./helpers/scaffoldProjectRoot.js";
 
 async function main() {
   logger.info("OATS | OpenApi spec'd Typescript Server Generator");
@@ -12,6 +13,8 @@ async function main() {
     appPath,
     flags: { spec },
   } = await parseInputs();
+
+  await scaffoldProjectRoot(appPath); // populate project root with template-core
 
   await generateRoutes(spec, appPath);
   console.log({ appName, spec });

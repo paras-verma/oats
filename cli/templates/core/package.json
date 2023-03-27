@@ -1,0 +1,26 @@
+{
+  "name": "express-ts-server",
+  "version": "0.0.0",
+  "description": "Express Server in Typescript | Generate by OATS",
+  "scripts": {
+    "dev": "nodemon --watch . -e ts,tsx --exec 'npm run build:local && clear && npm run host'",
+    "host": "node ./build-local/index.js",
+    "predeploy": "npm run build-prod",
+    "deploy": "./deploy.sh",
+    "build:prod": "npx esbuild ./app.prod.ts --bundle --outfile=build-prod/index.js --platform='node' --target='node16'",
+    "build:local": "npx esbuild ./app.dev.ts --bundle --outfile=build-local/index.js --platform='node' --target='node16'"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.2",
+    "express": "^4.18.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.19",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.3",
+    "@types/cors": "^2.8.12",
+    "@types/node": "^18.7.18"
+  }
+}

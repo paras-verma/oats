@@ -6,5 +6,6 @@
       "~/*": ["cli/*"]
     }
   },
-  "include": ["cli"]
+  "include": ["cli"],
+  "exclude": ["cli/templates"]
 }
