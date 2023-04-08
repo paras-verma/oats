@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { logger } from "~/utils/logger.js";
 import generateRoutes from "./helpers/generateRoutes.js";
+import generateTypes from "./helpers/generateTypes.js";
 import parseInputs from "./helpers/parseInputs.js";
 import scaffoldProjectRoot from "./helpers/scaffoldProjectRoot.js";
 
@@ -15,6 +16,8 @@ async function main() {
   } = await parseInputs();
 
   await scaffoldProjectRoot(appPath); // populate project root with template-core
+
+  await generateTypes(appPath, spec);
 
   await generateRoutes(spec, appPath);
   console.log({ appName, spec });
