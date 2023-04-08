@@ -4,11 +4,10 @@ import { resolve } from "path";
 const validationRegExp = /^(?:@[a-z0-9-*~][a-z0-9-*._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/;
 
 //Validate a string against allowed package.json names
-export const validateAppName = (input: string) => {
+export const validateAppName = async (input: string) => {
   const path = resolve(input);
   const paths = path.split("/");
-
-  if (exists(path)) return `Name-collision identified at ${path} \nPlease retry with with a different app-name or abort this process before continuing...`;
+  if (await exists(path)) return `Name collision identified at ${path} \nPlease retry with with a different app-name or abort this process before continuing...`;
 
   // If the first part is a @, it's a scoped package
   const indexOfDelimiter = paths.findIndex((p) => p.startsWith("@"));
