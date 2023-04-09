@@ -41,12 +41,18 @@ export default async function generateMongooseModels(appPath: string, quickMode:
         let fileContent = await readFile(`${appPath}/app/interfaces/${fileName}.ts`, { encoding: "utf-8" });
 
         // record and store enums (later to be stored in /index)
-        if (fileContent.includes("enum")) return handleEnums(fileContent, (enumStore[fileName] = []));
+        const containsEnums = fileContent.includes("enum");
+        const enumIdentifier = containsEnums ? handleEnums(fileContent, enumStore) : null;
+
+        // ignore if file only contains enum
+        if (containsEnums && !fileContent.includes("export interface")) return;
 
         // replace utility imports
         fileContent = fileContent.replace(/\s{1}([a-zA-Z])*((From|To)JSON).*/g, "");
+        // add enum imports
+        if (containsEnums && enumIdentifier) fileContent = fileContent.replace(/} from '\.\/';/gm, `${enumIdentifier} } from './';`);
         // removes empty imports
-        fileContent = fileContent.replace(/^import\s+(?:(?:\{[^}]*\})|\*)\s+from\s+['"][^'"]+['"];\s*$/gm, "");
+        // fileContent = fileContent.replace(/^import\s+(?:(?:\{[^}]*\})|\*)\s+from\s+['"][^'"]+['"];\s*$/gm, "");
         // fix types
         fileContent = fileContent.replace(/\?*:\s(\w+);/g, (_, type) => `: ${type.toUpperCase()[0] + type.slice(1)},`);
         // refactor Array types
@@ -59,7 +65,7 @@ export default async function generateMongooseModels(appPath: string, quickMode:
 
         const fileContentByLines: string[] = fileContent.split("\n");
 
-        const limitFileContentToIndex = indexOfLineWithString("export function", fileContentByLines, "starts-with");
+        const limitFileContentToIndex = indexOfLineWithString(containsEnums ? "export enum" : "export function", fileContentByLines, "starts-with");
 
         // limit file-content to interfaces
         fileContentByLines.splice(limitFileContentToIndex);
@@ -91,7 +97,10 @@ export default async function generateMongooseModels(appPath: string, quickMode:
       })
     )
   ).forEach((data) => {
-    if (data.status !== "fulfilled") console.log(data);
+    if (data.status !== "fulfilled") {
+      logger.warn(data.reason);
+      process.exit(1);
+    }
   });
 
   const modelFiles = typesFilesForConversion.map((name) => name);
@@ -103,6 +112,7 @@ export default async function generateMongooseModels(appPath: string, quickMode:
     return modelFiles.includes(entityName);
   });
 
+  indexFileContent.push("");
   Object.entries(enumStore).map(([enumIdentifier, values]) => {
     const payload = enumDeclaration(enumIdentifier, values);
     payload.split("\n").forEach((line) => indexFileContent.push(line));
@@ -111,9 +121,17 @@ export default async function generateMongooseModels(appPath: string, quickMode:
   await writeFile(`${appPath}/app/models/index.ts`, indexFileContent.join("\n"), { encoding: "utf-8" });
 }
 
-function handleEnums(fileContent: string, enumStore: string[]) {
-  const matchedResults = fileContent.matchAll(/= '(?<enumValue>\w+)/g);
-  Array.from(matchedResults).forEach((match) => enumStore.push(match.groups.enumValue));
+function handleEnums(fileContent: string, enumStore: IEnumStore) {
+  try {
+    const enumIdentifier = fileContent.match(/export enum (?<enumIdentifier>\w+) {/).groups.enumIdentifier;
+    enumStore[enumIdentifier] = [];
+    const matchedResults = fileContent.matchAll(/= '(?<enumValue>\w+)/g);
+    Array.from(matchedResults).forEach((match) => enumStore[enumIdentifier].push(match.groups.enumValue));
+    return enumIdentifier;
+  } catch (error) {
+    console.log(":", error);
+    return null;
+  }
 }
 
 export const enumDeclaration = (identifier: string, values: string[]) =>
