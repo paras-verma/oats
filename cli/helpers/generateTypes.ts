@@ -1,8 +1,10 @@
-import { mkdtempSync } from "fs";
+import { mkdtempSync, rm } from "fs";
 import { copy } from "fs-extra";
 import { tmpdir } from "os";
 import { join } from "path";
+import { PKG_ROOT } from "~/utils/constants.js";
 import { execa } from "~/utils/execAsync.js";
+import { handleError } from "~/utils/index.js";
 import { logger } from "~/utils/logger.js";
 
 export default async function (appPath: string, apiSpecPath: string) {
@@ -11,6 +13,8 @@ export default async function (appPath: string, apiSpecPath: string) {
 
   // generate interfaces
   logger.info("Generating types..");
+  await copy(`${PKG_ROOT}/cli/assets/openapitools.json`, `${process.cwd()}/openapitools.json`);
+
   const generatorOutput = await execa(`npx @openapitools/openapi-generator-cli generate -g typescript-fetch -i ${apiSpecPath} -o ${outputStore}`); // choose silent if possible
 
   if (!!generatorOutput.stderr) {
@@ -33,4 +37,12 @@ export default async function (appPath: string, apiSpecPath: string) {
   }
 
   logger.success("Types generated at `/models`");
+  await rm(outputStore, { force: true, recursive: true }, (error) => {
+    if (!error) return;
+    handleError("Failed to remove transient assets", error);
+  });
+  await rm(`${process.cwd()}/openapitools.json`, { force: true }, (error) => {
+    if (!error) return;
+    handleError("Failed to remove transient assets", error);
+  });
 }
