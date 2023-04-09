@@ -128,6 +128,7 @@ export default async function () {
         if (!mongoose) {
           logger.info("Skipping mongoose model generation.");
         }
+        cliResults.flags.mongoose = mongoose;
       }
 
       if (cliResults.flags.service !== "skip") {

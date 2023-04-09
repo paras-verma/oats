@@ -2,6 +2,7 @@
 import { logger } from "~/utils/logger.js";
 import generateRoutes from "./helpers/generateRoutes.js";
 import generateTypes from "./helpers/generateTypes.js";
+import generateMongooseModels from "./helpers/generateModels.js";
 import parseInputs from "./helpers/parseInputs.js";
 import scaffoldProjectRoot from "./helpers/scaffoldProjectRoot.js";
 
@@ -12,12 +13,14 @@ async function main() {
   const {
     appName,
     appPath,
-    flags: { spec },
+    flags: { spec, mongoose, quick },
   } = await parseInputs();
 
   await scaffoldProjectRoot(appPath); // populate project root with template-core
 
   await generateTypes(appPath, spec);
+
+  if (mongoose) await generateMongooseModels(appPath, quick);
 
   await generateRoutes(spec, appPath);
   console.log({ appName, spec });
