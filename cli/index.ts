@@ -5,6 +5,7 @@ import generateTypes from "./helpers/generateTypes.js";
 import generateMongooseModels from "./helpers/generateModels.js";
 import parseInputs from "./helpers/parseInputs.js";
 import scaffoldProjectRoot from "./helpers/scaffoldProjectRoot.js";
+import populateScripts from "./helpers/populateScripts.js";
 
 async function main() {
   logger.info("OATS | OpenApi spec'd Typescript Server Generator");
@@ -13,7 +14,7 @@ async function main() {
   const {
     appName,
     appPath,
-    flags: { spec, mongoose, quick },
+    flags: { mongoose, quick, service, spec },
   } = await parseInputs();
 
   await scaffoldProjectRoot(appPath); // populate project root with template-core
@@ -21,6 +22,8 @@ async function main() {
   await generateTypes(appPath, spec);
 
   if (mongoose) await generateMongooseModels(appPath, quick);
+
+  if (service !== "skip") await populateScripts(appPath, service);
 
   await generateRoutes(spec, appPath);
   console.log({ appName, spec });

@@ -7,7 +7,7 @@ import { getUserPkgManager } from "~/utils/getUserPkgManager.js";
 import { fileExists } from "~/utils/index.js";
 import validateApiSpec from "./validateApiSpec.js";
 
-interface CliFlags {
+export interface CliFlags {
   spec: string;
   noGit: boolean;
   noInstall: boolean;
