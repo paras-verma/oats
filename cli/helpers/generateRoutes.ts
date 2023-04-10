@@ -9,7 +9,7 @@ import routeFileTemplate from "~/templates/mustache/routes.js";
 export default async function (specFilePath: string, appPath: string) {
   const specFileContent = await readFile(specFilePath, { encoding: "utf-8" });
 
-  await mkdirp(`${appPath}/app/routes`);
+  await mkdirp(`${appPath}/app/controllers`);
 
   const parsedSpec = load(specFileContent) as IOpenApiSpec;
   const routes = Object.entries(parsedSpec.paths)
@@ -34,6 +34,6 @@ export default async function (specFilePath: string, appPath: string) {
       },
     };
     const fileContent = mustache.render(routeFileTemplate, mustachePayload);
-    await writeFile(`${appPath}/app/routes/${tag.name}.ts`, fileContent);
+    await writeFile(`${appPath}/app/controllers/${tag.name}.ts`, fileContent);
   });
 }
