@@ -29,7 +29,7 @@ function routeResolver(handlersPath: any, route: any, apiDoc: any) {
 
 app.use(
   OpenApiValidator.middleware({
-    apiSpec: path.join(__dirname, ""),
+    apiSpec: path.join(__dirname, "api.yaml"),
     validateRequests: true,
     validateResponses: {
       removeAdditional: "failing",

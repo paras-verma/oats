@@ -1,4 +1,4 @@
-import { load } from "js-yaml";
+import { dump, load } from "js-yaml";
 import { readFile, writeFile } from "fs/promises";
 import { mkdirp } from "fs-extra";
 import mustache from "mustache";
@@ -25,15 +25,20 @@ export default async function (specFilePath: string, appPath: string) {
       summary: route?.summary,
     }));
 
-  parsedSpec?.tags.map(async (tag) => {
-    const taggedRoutes = routes.filter(({ tag: routeTag }) => routeTag === tag.name);
-    const mustachePayload = {
-      routes: taggedRoutes,
-      detail: function () {
-        return this.description || this.summary ? `* description: ${this.description || this.summary}` : "";
-      },
-    };
-    const fileContent = mustache.render(routeFileTemplate, mustachePayload);
-    await writeFile(`${appPath}/app/controllers/${tag.name}.ts`, fileContent);
-  });
+  await Promise.allSettled(
+    parsedSpec?.tags.map(async (tag) => {
+      const taggedRoutes = routes.filter(({ tag: routeTag }) => routeTag === tag.name);
+      const mustachePayload = {
+        routes: taggedRoutes,
+        detail: function () {
+          return this.description || this.summary ? `* description: ${this.description || this.summary}` : "";
+        },
+      };
+      const fileContent = mustache.render(routeFileTemplate, mustachePayload);
+      await writeFile(`${appPath}/app/controllers/${tag.name}.ts`, fileContent);
+    })
+  );
+
+  // populate generated spec @ /api
+  await writeFile(`${appPath}/api/api.yaml`, dump(parsedSpec, { indent: 2, replacer: undefined }), { encoding: "utf-8" });
 }
