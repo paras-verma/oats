@@ -8,7 +8,6 @@ import { fileExists } from "~/utils/index.js";
 import validateApiSpec from "./validateApiSpec.js";
 
 export interface CliFlags {
-  spec: string;
   noGit: boolean;
   noInstall: boolean;
   default: boolean;
@@ -20,14 +19,15 @@ export interface CliFlags {
 interface CliResults {
   appName: string;
   appPath: string;
+  spec: string;
   flags: CliFlags;
 }
 
 const defaultOptions: CliResults = {
   appName: "ts-express-app",
   appPath: `${process.cwd()}/ts-express-app`,
+  spec: undefined,
   flags: {
-    spec: undefined,
     noGit: false,
     noInstall: false,
     default: false,
@@ -44,12 +44,12 @@ export default async function () {
 
   program
     .description("A CLI for scaffolding an Express server (Typescript) base on provided OAS 2.*/3.* spec")
-    .argument("[dir]", "The name of the application, as well as the name of the directory to create", "ts-server-stub")
-    .option(
-      "-s, --spec",
+    .argument(
+      "[spec]",
       `Path to OAS3.0 file outlying routes and data-schemas \n 
       Defaults to "api.yaml" at package root`
     )
+    .option("--name", "The name of the application, as well as the name of the directory to create")
     .option("--noGit", "Explicitly tells the CLI to not initialize a new git repo in the project", false)
     .option("--noInstall", "Explicitly tells the CLI to not run the package manager's install command", false)
     .option("--mongoose", "Opt-in to generate mongoose models from the supplied OAS3.0 file", false)
@@ -66,7 +66,11 @@ export default async function () {
     .parse(process.argv);
 
   // Needs to be separated outside the if statement to correctly infer the type as string | undefined
-  const projectName = program.args[0];
+  if (program.args[0]) {
+    cliResults.spec = program.args[0];
+    validateApiSpec(cliResults.spec);
+  }
+  const projectName = program.opts().name;
   if (projectName) {
     const { appName, appPath } = projectFolderDetails(projectName);
     cliResults.appName = appName;
@@ -78,27 +82,27 @@ export default async function () {
   else cliResults.flags = program.opts();
 
   // set default path to OAS-schema file if in default/quick mode
-  if (cliResults.flags.default || (cliResults.flags.quick && !cliResults.flags.spec)) cliResults.flags.spec = defaultApiSchema;
+  if (cliResults.flags.default || (cliResults.flags.quick && !cliResults.spec)) cliResults.spec = defaultApiSchema;
 
   try {
     if (!cliResults.flags.quick && !cliResults.flags.default) {
-      if (!cliResults.flags.spec) {
+      if (!cliResults.spec) {
         if (fileExists(defaultApiSchema)) {
-          cliResults.flags.spec = defaultApiSchema;
+          cliResults.spec = defaultApiSchema;
           logger.success("Located 'api.yaml' at root!");
           validateApiSpec(defaultApiSchema);
         } else {
-          const { spec } = await inquirer.prompt<Pick<CliFlags, "spec">>({
+          const { spec } = await inquirer.prompt<Pick<CliResults, "spec">>({
             name: "spec",
             type: "input",
             message: "Please provide a path to your OAS3.0 file:",
-            default: defaultOptions.flags.spec,
+            default: defaultOptions.spec,
             validate: validateApiSpec,
             transformer: (input: string) => {
               return input.trim();
             },
           });
-          cliResults.flags.spec = spec;
+          cliResults.spec = spec;
         }
       }
 

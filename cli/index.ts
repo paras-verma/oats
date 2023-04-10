@@ -14,7 +14,8 @@ async function main() {
   const {
     appName,
     appPath,
-    flags: { mongoose, quick, service, spec },
+    spec,
+    flags: { mongoose, quick, service },
   } = await parseInputs();
 
   await scaffoldProjectRoot(appPath); // populate project root with template-core
