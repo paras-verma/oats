@@ -3,12 +3,11 @@
   "version": "0.0.0",
   "description": "Express Server in Typescript | Generate by OATS",
   "scripts": {
-    "dev": "nodemon --watch . -e ts,tsx --exec 'npm run build:local && clear && npm run host'",
+    "dev": "nodemon --watch . -e ts,tsx --exec 'npm run build -- dev && npm run host'",
     "host": "node ./build-local/index.js",
-    "predeploy": "npm run build-prod",
-    "deploy": "./deploy.sh",
-    "build:prod": "npx esbuild ./app.prod.ts --bundle --outfile=build-prod/index.js --platform='node' --target='node16'",
-    "build:local": "npx esbuild ./app.dev.ts --bundle --outfile=build-local/index.js --platform='node' --target='node16'"
+    "predeploy": "npm run build -- prod",
+    "build": "./build.sh",
+    "deploy": "./deploy.sh"
   },
   "license": "ISC",
   "dependencies": {
