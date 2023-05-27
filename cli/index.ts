@@ -22,7 +22,7 @@ async function main() {
 
   const generatedTypes = await generateTypes(appPath, spec);
 
-  if (mongoose) await generateMongooseModels(appPath, quick);
+  if (mongoose) await generateMongooseModels(appPath, quick, generatedTypes);
 
   if (service !== "skip") await populateScripts(appPath, service);
 

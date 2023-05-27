@@ -1,6 +1,6 @@
 import inquirer from "inquirer";
 import { mkdirp } from "fs-extra";
-import { readdir, readFile, writeFile } from "fs/promises";
+import { readFile, writeFile } from "fs/promises";
 
 import { logger } from "~/utils/logger.js";
 import indexOfLineWithString from "~/utils/indexOfLineWithString.js";
@@ -9,17 +9,15 @@ interface IEnumStore {
   [key: string]: string[];
 }
 
-export default async function generateMongooseModels(appPath: string, quickMode: boolean) {
-  const directoryContents = await readdir(`${appPath}/app/interfaces/`, { encoding: "utf-8" });
-
-  const typesFilesForConversion = quickMode ? directoryContents.map((name) => name.replace(".ts", "")) : [];
+export default async function generateMongooseModels(appPath: string, quickMode: boolean, availableTypes: string[]) {
+  const typesFilesForConversion = quickMode ? availableTypes.map((name) => name.replace(".ts", "")) : [];
 
   if (!quickMode) {
     const { models } = await inquirer.prompt<{ models: string[] }>({
       name: "models",
       type: "checkbox",
       message: "Please select data-schemas for which mongoose models are to be generated for:",
-      choices: directoryContents
+      choices: availableTypes
         .filter((name) => !name.startsWith("index")) // index to be parsed later; enums to be declared there
         .map((value) => ({
           name: value.replace(".ts", ""),
