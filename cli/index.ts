@@ -15,14 +15,14 @@ async function main() {
     appName,
     appPath,
     spec,
-    flags: { mongoose, quick, service },
+    flags: { mongoose, service },
   } = await parseInputs();
 
   await scaffoldProjectRoot(appPath); // populate project root with template-core
 
   const generatedTypes = await generateTypes(appPath, spec);
 
-  if (mongoose) await generateMongooseModels(appPath, quick, generatedTypes);
+  if (mongoose) await generateMongooseModels(appPath, generatedTypes);
 
   if (service !== "skip") await populateScripts(appPath, service);
 
