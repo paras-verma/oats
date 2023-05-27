@@ -1,30 +1,16 @@
-import { mkdtempSync, rm } from "fs";
+import { rm } from "fs";
 import { copy } from "fs-extra";
-import { tmpdir } from "os";
-import { join } from "path";
-import { PKG_ROOT } from "~/utils/constants.js";
 import { execa } from "~/utils/execAsync.js";
 import { handleError } from "~/utils/index.js";
 import { logger } from "~/utils/logger.js";
+import { generateTransientAssets } from "./manageTransientAssets.js";
 
 export default async function (appPath: string, apiSpecPath: string) {
-  const outputStorePath = join(tmpdir(), "oas-");
-  const outputStore = mkdtempSync(outputStorePath);
+  const outputStore = await generateTransientAssets(apiSpecPath);
 
-  // generate interfaces
-  logger.info("Generating types..");
-  await copy(`${PKG_ROOT}/cli/assets/openapitools.json`, `${process.cwd()}/openapitools.json`);
-
-  const generatorOutput = await execa(`npx @openapitools/openapi-generator-cli generate -g typescript-fetch -i ${apiSpecPath} -o ${outputStore}`); // choose silent if possible
-
-  if (!!generatorOutput.stderr) {
-    logger.error("Error occurred while generating types for schema\n");
-    logger.warn(generatorOutput.stderr);
-    process.exit(1);
-  }
-
+  const generatedTypes: string[] = [];
   // move them to project root
-  await copy(`${outputStore}/models`, `${appPath}/app/interfaces/`);
+  await copy(`${outputStore}/models`, `${appPath}/app/interfaces/`, { filter: (src, dest) => !!generatedTypes.push(src) });
 
   // correct runtime imports to /utils
   logger.info("Updating generated type...");
@@ -45,4 +31,6 @@ export default async function (appPath: string, apiSpecPath: string) {
     if (!error) return;
     handleError("Failed to remove transient assets", error);
   });
+
+  return generatedTypes.map((file) => file.split("/models/")[1]).filter((item) => !!item);
 }

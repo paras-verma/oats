@@ -20,7 +20,7 @@ async function main() {
 
   await scaffoldProjectRoot(appPath); // populate project root with template-core
 
-  await generateTypes(appPath, spec);
+  const generatedTypes = await generateTypes(appPath, spec);
 
   if (mongoose) await generateMongooseModels(appPath, quick);
 
