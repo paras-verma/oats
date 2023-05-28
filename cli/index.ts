@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { logger } from "~/utils/logger.js";
-import generateRoutes from "./helpers/generateRoutes.js";
+import generateRoutes from "./helpers/generateRoutes/index.js";
 import generateTypes from "./helpers/generateTypes.js";
 import generateMongooseModels from "./helpers/generateModels.js";
 import parseInputs from "./helpers/parseInputs.js";

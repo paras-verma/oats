@@ -1,29 +1,15 @@
-import { dump, load } from "js-yaml";
-import { readFile, writeFile } from "fs/promises";
+import { dump } from "js-yaml";
+import { writeFile } from "fs/promises";
 import { mkdirp } from "fs-extra";
 import mustache from "mustache";
 
-import { IOpenApiSpec } from "~/interface/oas.js";
 import routeFileTemplate from "~/templates/mustache/routes.js";
+import evaluateRoutesForGeneration from "./evaluator.js";
 
 export default async function (specFilePath: string, appPath: string) {
-  const specFileContent = await readFile(specFilePath, { encoding: "utf-8" });
-
   await mkdirp(`${appPath}/app/controllers`);
 
-  const parsedSpec = load(specFileContent) as IOpenApiSpec;
-  const routes = Object.entries(parsedSpec.paths)
-    .map(([path, route]) => {
-      return Object.entries(route).map(([method, details]) => ({ path, method, ...details }));
-    })
-    .flat(1)
-    .map((route) => ({
-      tag: route?.tags[0] || "index",
-      path: route.path,
-      operationId: route?.operationId || route?.path.replaceAll("/", "_").replaceAll("{", "_").replaceAll("}", ""),
-      description: route?.description,
-      summary: route?.summary,
-    }));
+  const { parsedSpec, routes } = await evaluateRoutesForGeneration(specFilePath, appPath);
 
   await Promise.allSettled(
     parsedSpec?.tags.map(async (tag) => {
