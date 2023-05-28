@@ -24,6 +24,7 @@ async function main() {
   let store = undefined;
   if (update) store = await modelUpdateWarning(appPath, spec, mongoose);
 
+  const generatedTypes = await generateTypes(appPath, spec, store);
 
   if (mongoose) await generateMongooseModels(appPath, generatedTypes);
 

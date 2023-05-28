@@ -5,8 +5,8 @@ import { handleError } from "~/utils/index.js";
 import { logger } from "~/utils/logger.js";
 import { generateTransientAssets } from "./manageTransientAssets.js";
 
-export default async function (appPath: string, apiSpecPath: string) {
-  const outputStore = await generateTransientAssets(apiSpecPath);
+export default async function (appPath: string, apiSpecPath: string, outputStore: string) {
+  if (!outputStore) outputStore = await generateTransientAssets(apiSpecPath);
 
   const generatedTypes: string[] = [];
   // move them to project root
