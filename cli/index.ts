@@ -30,8 +30,7 @@ async function main() {
 
   if (service !== "skip") await populateScripts(appPath, service);
 
-  await generateRoutes(spec, appPath);
-  console.log({ appName, spec });
+  await generateRoutes(spec, appPath, Boolean(update));
 }
 
 main().catch((err) => {
