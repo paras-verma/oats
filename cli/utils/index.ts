@@ -15,3 +15,5 @@ export function handleError(message: string, error: Error) {
   logger.info(error);
   process.exit(1);
 }
+
+export const cleanupFileNames = (data: string | string[]) => (Array.isArray(data) ? data : [data]).map((fileName) => fileName.replace(/\.\w$/g, ""));
