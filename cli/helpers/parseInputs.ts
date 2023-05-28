@@ -13,6 +13,7 @@ export interface CliFlags {
   default: boolean;
   mongoose: boolean;
   service: "gcf_http" | "gcf_pub_sub" | "aws_lambda" | "aws_lambda_edge" | "skip";
+  update: string | null;
   quick: boolean;
 }
 
@@ -33,6 +34,7 @@ const defaultOptions: CliResults = {
     default: false,
     mongoose: false,
     service: "skip",
+    update: null,
     quick: false,
   },
 };
@@ -54,6 +56,7 @@ export default async function () {
     .option("--noInstall", "Explicitly tells the CLI to not run the package manager's install command", false)
     .option("--mongoose", "Opt-in to generate mongoose models from the supplied OAS3.0 file", false)
     .addOption(new Option("-p, --service <service>", "Service for which the deployment scripts are to be generated").choices([...serviceOptions, "skip"]))
+    .option("-u, --update <project-directory>", "Populates missing assets (models, interfaces, routes), in the provided directory")
     .option("-y, --default", "Bypass the CLI and use all default options to bootstrap a new app", false)
     .option("-q, --quick", "Runs cli in quick mode with only provided flags", false)
     .version("0.0.0", "-v, --version", "Display the version number")
@@ -70,6 +73,7 @@ export default async function () {
     cliResults.spec = program.args[0];
     validateApiSpec(cliResults.spec);
   }
+
   const projectName = program.opts().name;
   if (projectName) {
     const { appName, appPath } = projectFolderDetails(projectName);
@@ -83,6 +87,14 @@ export default async function () {
 
   // set default path to OAS-schema file if in default/quick mode
   if (cliResults.flags.default || (cliResults.flags.quick && !cliResults.spec)) cliResults.spec = defaultApiSchema;
+
+  // cliResults.flags.mode = program.opts<CliFlags>().default ? "default" : program.opts<CliFlags>().quick ? "quick" : program.opts<CliFlags>().updateMode ? "update" : "none";
+  const isUpdateMode = Boolean(cliResults.flags.update);
+  if (isUpdateMode) {
+    const { appName, appPath } = projectFolderDetails(cliResults.flags.update);
+    cliResults.appName = appName;
+    cliResults.appPath = appPath;
+  }
 
   try {
     if (!cliResults.flags.quick && !cliResults.flags.default) {
@@ -106,7 +118,7 @@ export default async function () {
         }
       }
 
-      if (!projectName) {
+      if (!projectName && !isUpdateMode) {
         const { appName: input } = await inquirer.prompt<Pick<CliResults, "appName">>({
           name: "appName",
           type: "input",
@@ -117,6 +129,7 @@ export default async function () {
             return input.trim();
           },
         });
+
         const { appName, appPath } = projectFolderDetails(input);
         cliResults.appName = appName;
         cliResults.appPath = appPath;
@@ -126,7 +139,7 @@ export default async function () {
         const { mongoose } = await inquirer.prompt<{ mongoose: boolean }>({
           name: "mongoose",
           type: "confirm",
-          message: "Generate mongoose models?",
+          message: `Do you wish to ${isUpdateMode ? "update" : "generate"} mongoose models?`,
           default: false,
         });
         if (!mongoose) {
@@ -135,7 +148,7 @@ export default async function () {
         cliResults.flags.mongoose = mongoose;
       }
 
-      if (cliResults.flags.service !== "skip") {
+      if (cliResults.flags.service !== "skip" && !isUpdateMode) {
         const { service } = await inquirer.prompt<Pick<CliFlags, "service">>({
           name: "service",
           type: "list",
@@ -152,7 +165,7 @@ export default async function () {
       }
 
       // Skip if noGit flag provided
-      if (!cliResults.flags.noGit) {
+      if (!cliResults.flags.noGit && !isUpdateMode) {
         const { git } = await inquirer.prompt<{ git: boolean }>({
           name: "git",
           type: "confirm",
@@ -167,7 +180,7 @@ export default async function () {
 
       const pkgManager = getUserPkgManager();
 
-      if (!cliResults.flags.noInstall) {
+      if (!cliResults.flags.noInstall && !isUpdateMode) {
         const { runInstall } = await inquirer.prompt<{ runInstall: boolean }>({
           name: "runInstall",
           type: "confirm",
