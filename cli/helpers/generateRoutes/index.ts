@@ -3,7 +3,7 @@ import { writeFile } from "fs/promises";
 import { mkdirp } from "fs-extra";
 import mustache from "mustache";
 
-import routeFileTemplate from "~/templates/mustache/routes.js";
+import routeFileTemplate from "~/templates/routes.js";
 import evaluateRoutesForGeneration from "./evaluator.js";
 import { appendFile } from "fs";
 import { logger } from "~/utils/logger.js";

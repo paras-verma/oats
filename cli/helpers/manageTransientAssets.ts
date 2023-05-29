@@ -12,7 +12,7 @@ export async function generateTransientAssets(apiSpecPath: string) {
 
   // generate interfaces
   logger.info("Generating types..");
-  await copy(`${PKG_ROOT}/cli/assets/openapitools.json`, `${process.cwd()}/openapitools.json`);
+  await copy(`${PKG_ROOT}/dist/assets/openapitools.json`, `${process.cwd()}/openapitools.json`);
 
   const generatorOutput = await execa(`npx @openapitools/openapi-generator-cli generate -g typescript-fetch -i ${apiSpecPath} -o ${outputStore}`); // choose silent if possible
 

@@ -1,4 +1,4 @@
-import app from "./app";
+import app from "./app/index";
 
 const entryPoint = (request: any, response: any) => {
   if (!request.path) {
