@@ -33,8 +33,9 @@
     "typescript": "^4.9.5"
   },
   "scripts": {
+    "prebuild": "rm -rf dist",
     "build": "tsup",
-    "postbuild": "cp -r cli/assets/ dist/assets",
+    "postbuild": "cp -r cli/assets/ dist/assets/",
     "dev": "tsup --watch"
   },
   "keywords": [
