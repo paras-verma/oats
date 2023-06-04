@@ -8,6 +8,7 @@ import scaffoldProjectRoot from "./helpers/scaffoldProjectRoot.js";
 import populateScripts from "./helpers/populateScripts.js";
 import modelUpdateWarning from "./helpers/modelsUpdateWarning.js";
 import enableGit from "./helpers/enableGIT.js";
+import installDependencies from "./helpers/installDependencies.js";
 
 async function main() {
   logger.info("OATS | OpenApi spec'd Typescript Server Generator");
@@ -17,7 +18,7 @@ async function main() {
     appName,
     appPath,
     spec,
-    flags: { mongoose, service, update, noGit },
+    flags: { mongoose, service, update, noGit, noInstall },
   } = await parseInputs();
 
   await scaffoldProjectRoot(appPath); // populate project root with template-core
@@ -34,6 +35,7 @@ async function main() {
   await generateRoutes(spec, appPath, Boolean(update));
 
   if (!noGit && !update) enableGit(appPath);
+  if (!noInstall && !update) installDependencies(appPath);
 }
 
 main().catch((err) => {
