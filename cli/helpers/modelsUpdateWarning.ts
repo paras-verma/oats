@@ -31,7 +31,7 @@ export default async function modelUpdateWarning(appPath: string, apiSpecPath: s
   const conflictingInterfaces = incomingUpdatedModels.filter((model) => existingInterfaces.includes(model));
   const conflictingModels = incomingUpdatedModels.filter((model) => existingModels.includes(model));
 
-  const conflicts = conflictingInterfaces.length + conflictingModels.length;
+  const conflicts = conflictingInterfaces.length + (mongoose ? conflictingModels.length : 0);
   if (Boolean(conflicts)) {
     logger.warn(`${conflicts} Conflicts found!`);
     logger.disabled(` - ${conflictingInterfaces.length} interfaces`);
@@ -48,8 +48,7 @@ export default async function modelUpdateWarning(appPath: string, apiSpecPath: s
 
   if (updateModels) return outputStore;
 
-  logger.info("Aborting update...");
-  process.exit(0);
+  return logger.info("Aborting update...");
 }
 
 /**
