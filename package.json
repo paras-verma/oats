@@ -33,9 +33,11 @@
     "typescript": "^4.9.5"
   },
   "scripts": {
+    "prepare": "npx @openapitools/openapi-generator-cli version-manager set 5.2.0",
     "prebuild": "rm -rf dist",
     "build": "tsup",
     "postbuild": "cp -r cli/assets/ dist/assets/",
+    "predev": "npm run prebuild",
     "dev": "tsup --watch"
   },
   "keywords": [

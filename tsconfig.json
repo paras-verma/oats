@@ -7,5 +7,5 @@
     }
   },
   "include": ["cli"],
-  "exclude": ["cli/templates"]
+  "exclude": ["cli/assets/**"]
 }
