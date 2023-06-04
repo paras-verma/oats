@@ -1,13 +1,14 @@
 const routeFileTemplate = `{{#isNew}}
-import { NextFunction, Router, Request, Response, } from "express";
+import { NextFunction, Request, Response } from "express";
+import { handler } from "~/app/utils/routes.js";
 {{/isNew}}
 {{#routes}}
 
-/*
+/**
   @path {{{path}}}
   {{detail}}
-*/
-export const {{operationId}} = Router.use("/", (request: Request, response: Response, next: NextFunction) => {})
+**/
+export const {{operationId}} = handler((request: Request, response: Response, next: NextFunction) => {})
 {{/routes}}
 `;
 

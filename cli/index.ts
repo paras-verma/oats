@@ -28,7 +28,7 @@ async function main() {
 
   if (mongoose) await generateMongooseModels(appPath, generatedTypes);
 
-  if (service !== "skip") await populateScripts(appPath, service);
+  if (service !== "skip" && !update) await populateScripts(appPath, service);
 
   await generateRoutes(spec, appPath, Boolean(update));
 }
