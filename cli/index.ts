@@ -7,6 +7,7 @@ import parseInputs from "./helpers/parseInputs.js";
 import scaffoldProjectRoot from "./helpers/scaffoldProjectRoot.js";
 import populateScripts from "./helpers/populateScripts.js";
 import modelUpdateWarning from "./helpers/modelsUpdateWarning.js";
+import enableGit from "./helpers/enableGIT.js";
 
 async function main() {
   logger.info("OATS | OpenApi spec'd Typescript Server Generator");
@@ -16,7 +17,7 @@ async function main() {
     appName,
     appPath,
     spec,
-    flags: { mongoose, service, update },
+    flags: { mongoose, service, update, noGit },
   } = await parseInputs();
 
   await scaffoldProjectRoot(appPath); // populate project root with template-core
@@ -31,6 +32,8 @@ async function main() {
   if (service !== "skip" && !update) await populateScripts(appPath, service);
 
   await generateRoutes(spec, appPath, Boolean(update));
+
+  if (!noGit && !update) enableGit(appPath);
 }
 
 main().catch((err) => {
@@ -41,5 +44,5 @@ main().catch((err) => {
     logger.error("An unknown error has occurred. Please open an issue on github with the below:");
     console.log(err);
   }
-  process.exit(1);
+  process.exit(0);
 });
