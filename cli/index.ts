@@ -9,6 +9,7 @@ import populateScripts from "./helpers/populateScripts.js";
 import modelUpdateWarning from "./helpers/modelsUpdateWarning.js";
 import enableGit from "./helpers/enableGIT.js";
 import installDependencies from "./helpers/installDependencies.js";
+import nextSteps from "./helpers/nextSteps.js";
 
 async function main() {
   logger.info("OATS | OpenApi spec'd Typescript Server Generator");
@@ -36,6 +37,8 @@ async function main() {
 
   if (!noGit && !update) enableGit(appPath);
   if (!noInstall && !update) installDependencies(appPath);
+
+  if (!update) nextSteps(appName);
 }
 
 main().catch((err) => {
