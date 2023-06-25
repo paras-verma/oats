@@ -24,7 +24,10 @@ export default async function generateMongooseModels(appPath: string, availableT
 
         // record and store enums (later to be stored in /index)
         const containsEnums = fileContent.includes("enum");
-        const enumIdentifier = containsEnums ? handleEnums(fileContent, enumStore) : null;
+        const enumIdentifiers = containsEnums ? handleEnums(fileContent, enumStore) : null;
+        const hasImports = fileContent.includes("} from './'");
+
+        const enumImportStatement = `${!hasImports ? "import { " : "" }${enumIdentifiers?.join(", ")} } from './';\n`;
 
         // ignore if file only contains enum
         if (containsEnums && !fileContent.includes("export interface")) return;
@@ -32,7 +35,7 @@ export default async function generateMongooseModels(appPath: string, availableT
         // replace utility imports
         fileContent = fileContent.replace(/\s{1}([a-zA-Z])*((From|To)JSON).*/g, "");
         // add enum imports
-        if (containsEnums && enumIdentifier) fileContent = fileContent.replace(/} from '\.\/';/gm, `${enumIdentifier} } from './';`);
+        if (containsEnums && enumIdentifiers?.length && hasImports) fileContent = fileContent.replace(/} from '\.\/';/gm, enumImportStatement);
         // removes empty imports
         // fileContent = fileContent.replace(/^import\s+(?:(?:\{[^}]*\})|\*)\s+from\s+['"][^'"]+['"];\s*$/gm, "");
         // fix types
@@ -42,7 +45,7 @@ export default async function generateMongooseModels(appPath: string, availableT
         // add type import and export declaration
         fileContent = fileContent.replace(
           /export interface (\w+) {/g,
-          (_, name) => `import { type ${name} as ${name}Type } from "../interfaces/${name}.js";\n\nexport const ${name}Schema = new mongoose.Schema<${name}Type>({`
+          (_, name) => `${!hasImports ? enumImportStatement : ""}import { type ${name} as ${name}Type } from "../interfaces/${name}.js";\n\nexport const ${name}Schema = new mongoose.Schema<${name}Type>({`
         );
 
         const fileContentByLines: string[] = fileContent.split("\n");
@@ -105,11 +108,19 @@ export default async function generateMongooseModels(appPath: string, availableT
 
 function handleEnums(fileContent: string, enumStore: IEnumStore) {
   try {
-    const enumIdentifier = fileContent.match(/export enum (?<enumIdentifier>\w+) {/).groups.enumIdentifier;
-    enumStore[enumIdentifier] = [];
-    const matchedResults = fileContent.matchAll(/= '(?<enumValue>\w+)/g);
-    Array.from(matchedResults).forEach((match) => enumStore[enumIdentifier].push(match.groups.enumValue));
-    return enumIdentifier;
+    const enumMetaData = Array.from(fileContent.matchAll(/export enum (?<enumIdentifier>\w+) {/g)).reduce((store, match) => ({...store, [match.groups.enumIdentifier]: match.index}), {});
+
+    Object.entries(enumMetaData).forEach(([enumIdentifier, index]) => {
+      const terminatingIndex = fileContent.substring(index as number).indexOf("}");
+      const enumDeclaration = fileContent.substring(index as number, index as number + terminatingIndex);
+
+      enumStore[enumIdentifier] = [];
+
+      const matchedResults = enumDeclaration.matchAll(/= '(?<enumValue>\w+)/g);
+      Array.from(matchedResults).forEach((match) => enumStore[enumIdentifier].push(match.groups.enumValue));
+    });
+
+    return Object.keys(enumMetaData);
   } catch (error) {
     console.log(":", error);
     return null;
