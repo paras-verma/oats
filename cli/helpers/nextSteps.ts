@@ -8,7 +8,7 @@ export default function nextSteps(appName: string, noInstall: boolean, vendor: s
   const nextSteps = [`You may now proceed to ${appName}`];
   if (noInstall) nextSteps.push(`Install dependencies: ${packageManager} install`);
   nextSteps.push(`Start development server: ${packageManager} run dev`);
-  if (vendor !== "skip") nextSteps.push(`Deploy to vendor: ${packageManager} run deploy`);
+  if (vendor !== "skip") nextSteps.push(`| Note: Please setup required resources first and deploy using \`${packageManager} run deploy\``);
 
   logger.info(nextSteps.join("\n"));
 }

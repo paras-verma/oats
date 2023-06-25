@@ -38,7 +38,7 @@ async function main() {
   if (!noGit && !update) enableGit(appPath);
   if (!noInstall && !update) installDependencies(appPath);
 
-  if (!update) nextSteps(appName);
+  if (!update) nextSteps(appName, noInstall, service);
 }
 
 main().catch((err) => {
