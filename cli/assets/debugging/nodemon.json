@@ -1,0 +1,6 @@
+{
+  "watch": ["app", "app.dev.ts"],
+  "ext": "ts",
+  "signal": "SIGTERM",
+  "exec": "./build.sh debug && node"
+}

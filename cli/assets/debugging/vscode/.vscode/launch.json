@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Program",
+      "skipFiles": ["<node_internals>/**"],
+      "restart": { "maxAttempts": 10 },
+      "runtimeExecutable": "${workspaceFolder}/node_modules/nodemon/bin/nodemon.js",
+      "program": "${workspaceFolder}/build-debug/app.dev.js",
+      "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"]
+    }
+  ]
+}

@@ -4,6 +4,7 @@
     "module": "Node16" /* Specify what module code is generated. */,
     "strict": true /* Enable all strict type-checking options. */,
     "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
     "moduleResolution": "Node16",
     "paths": {
