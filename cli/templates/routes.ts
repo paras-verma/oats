@@ -1,6 +1,6 @@
 const routeFileTemplate = `{{#isNew}}
 import { NextFunction, Request, Response } from "express";
-import { handler } from "~/utils/routes.js";
+import { handler } from "~/utils/index.js";
 {{/isNew}}
 {{#routes}}
 

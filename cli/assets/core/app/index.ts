@@ -5,7 +5,7 @@ import cors from "cors";
 import { join } from "path";
 import express, { NextFunction, Request, Response } from "express";
 import * as OpenApiValidator from "express-openapi-validator";
-import { routesResolver } from "./utils/routes";
+import { routesResolver } from "~/utils/routes.js";
 
 const app = express();
 

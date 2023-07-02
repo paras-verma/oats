@@ -11,7 +11,7 @@ export function routesResolver(handlersPath: any, route: any, apiDoc: any) {
   const modulePath = path.join(handlersPath, controller);
   const cacheKey = `${controller}-${method}`;
 
-  handlerCache[cacheKey] = import(`${modulePath}.ts`);
+  handlerCache[cacheKey] = import(`${modulePath}.js`);
   return async (req: any, res: any, next: any) => {
     await handlerCache[cacheKey]
       .then((module: any) => {
