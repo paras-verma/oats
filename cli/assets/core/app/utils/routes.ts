@@ -1,25 +1,24 @@
-import { NextFunction, Request, Response, RequestHandler } from "express";
 import path from "path";
 
+const handlerCache: any = {};
+
 export function routesResolver(handlersPath: any, route: any, apiDoc: any) {
-  const pathKey = route.openApiRoute.substring(route.basePath.length);
+  const pathKey = route.openApiRoute;
   const schema = apiDoc.paths[pathKey][route.method.toLowerCase()];
 
   const controller = schema["tags"]?.[0];
   const method = schema["operationId"];
   const modulePath = path.join(handlersPath, controller);
-  const handler = require(modulePath);
+  const cacheKey = `${controller}-${method}`;
 
-  if (handler[method] === undefined) {
-    throw new Error(`Could not find a [${method}] function in ${modulePath} when trying to route [${route.method} ${route.expressRoute}].`);
-  }
-  return handler[method];
-}
+  handlerCache[cacheKey] = import(`${modulePath}.ts`);
+  return async (req: any, res: any, next: any) => {
+    await handlerCache[cacheKey]
+      .then((module: any) => {
+        if (!module.default[method]) throw Error(`Could not find ${method} @ ${modulePath}`);
 
-export function handler(...middlewares: Array<RequestHandler>) {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    for (const middleware of middlewares) {
-      await middleware(req, res, next);
-    }
+        return module.default[method](req, res, () => {});
+      })
+      .catch(next);
   };
 }
