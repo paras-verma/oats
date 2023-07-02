@@ -27,7 +27,7 @@ export default async function generateMongooseModels(appPath: string, availableT
         const enumIdentifiers = containsEnums ? handleEnums(fileContent, enumStore) : null;
         const hasImports = fileContent.includes("} from './'");
 
-        const enumImportStatement = `${!hasImports ? "import { " : "" }${enumIdentifiers?.join(", ")} } from './';\n`;
+        const enumImportStatement = `${!hasImports ? "import { " : ""}${enumIdentifiers?.join(", ")} } from './';\n`;
 
         // ignore if file only contains enum
         if (containsEnums && !fileContent.includes("export interface")) return;
@@ -43,10 +43,12 @@ export default async function generateMongooseModels(appPath: string, availableT
         // refactor Array types
         fileContent = fileContent.replace(/\?*:\sArray<(\w+)>;/g, (_, type) => `: [${type.toUpperCase()[0] + type.slice(1)}],`);
         // add type import and export declaration
-        fileContent = fileContent.replace(
-          /export interface (\w+) {/g,
-          (_, name) => `${!hasImports ? enumImportStatement : ""}import { type ${name} as ${name}Type } from "../interfaces/${name}.js";\n\nexport const ${name}Schema = new mongoose.Schema<${name}Type>({`
-        );
+        fileContent = fileContent.replace(/export interface (\w+) {/g, (_, name) => {
+          const updatedExportStatement = `import { type ${name} as ${name}Type } from "../interfaces/${name}.js";\n\nexport const ${name}Schema = new mongoose.Schema<${name}Type>({`;
+
+          if (!hasImports && Boolean(enumIdentifiers?.length)) return enumImportStatement.concat(updatedExportStatement);
+          return updatedExportStatement;
+        });
 
         const fileContentByLines: string[] = fileContent.split("\n");
 
@@ -108,11 +110,14 @@ export default async function generateMongooseModels(appPath: string, availableT
 
 function handleEnums(fileContent: string, enumStore: IEnumStore) {
   try {
-    const enumMetaData = Array.from(fileContent.matchAll(/export enum (?<enumIdentifier>\w+) {/g)).reduce((store, match) => ({...store, [match.groups.enumIdentifier]: match.index}), {});
+    const enumMetaData = Array.from(fileContent.matchAll(/export enum (?<enumIdentifier>\w+) {/g)).reduce(
+      (store, match) => ({ ...store, [match.groups.enumIdentifier]: match.index }),
+      {}
+    );
 
     Object.entries(enumMetaData).forEach(([enumIdentifier, index]) => {
       const terminatingIndex = fileContent.substring(index as number).indexOf("}");
-      const enumDeclaration = fileContent.substring(index as number, index as number + terminatingIndex);
+      const enumDeclaration = fileContent.substring(index as number, (index as number) + terminatingIndex);
 
       enumStore[enumIdentifier] = [];
 
