@@ -10,6 +10,7 @@ import modelUpdateWarning from "./helpers/modelsUpdateWarning.js";
 import enableGit from "./helpers/enableGIT.js";
 import installDependencies from "./helpers/installDependencies.js";
 import nextSteps from "./helpers/nextSteps.js";
+import setupDebugging from "./helpers/setupDebugging.js";
 
 async function main() {
   logger.info("OATS | OpenApi spec'd Typescript Server Generator");
@@ -19,7 +20,7 @@ async function main() {
     appName,
     appPath,
     spec,
-    flags: { mongoose, service, update, noGit, noInstall },
+    flags: { mongoose, service, update, noGit, noInstall, setupVSCDebugging },
   } = await parseInputs();
 
   await scaffoldProjectRoot(appPath); // populate project root with template-core
@@ -37,6 +38,7 @@ async function main() {
 
   if (!noGit && !update) enableGit(appPath);
   if (!noInstall && !update) installDependencies(appPath);
+  if (setupVSCDebugging) setupDebugging(appPath, "vscode");
 
   if (!update) nextSteps(appName, noInstall, service);
 }

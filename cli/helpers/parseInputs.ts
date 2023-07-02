@@ -15,6 +15,7 @@ export interface CliFlags {
   service: "gcf_http" | "gcf_pub_sub" | "aws_lambda" | "aws_lambda_edge" | "skip";
   update: string | null;
   quick: boolean;
+  setupVSCDebugging: boolean;
 }
 
 interface CliResults {
@@ -36,6 +37,7 @@ const defaultOptions: CliResults = {
     service: "skip",
     update: null,
     quick: false,
+    setupVSCDebugging: false,
   },
 };
 
@@ -55,6 +57,7 @@ export default async function () {
     .option("--noGit", "Explicitly tells the CLI to not initialize a new git repo in the project", false)
     .option("--noInstall", "Explicitly tells the CLI to not run the package manager's install command", false)
     .option("--mongoose", "Opt-in to generate mongoose models from the supplied OAS3.0 file", false)
+    .option("--vsc-debug", "Opt-in to setup files for debugging w/ VS-Code", false)
     .addOption(new Option("-p, --service <service>", "Service for which the deployment scripts are to be generated").choices([...serviceOptions, "skip"]))
     .option("-u, --update <project-directory>", "Populates missing assets (models, interfaces, routes), in the provided directory")
     .option("-y, --default", "Bypass the CLI and use all default options to bootstrap a new app", false)
@@ -162,6 +165,16 @@ export default async function () {
           ],
         });
         cliResults.flags.service = service;
+      }
+
+      if (!cliResults.flags.setupVSCDebugging && !isUpdateMode) {
+        const { setupVSCDebugging } = await inquirer.prompt<{ setupVSCDebugging: boolean }>({
+          name: "setupVSCDebugging",
+          type: "confirm",
+          message: "Setup assets for debugging w/ VS-Code?",
+          default: false,
+        });
+        cliResults.flags.setupVSCDebugging = setupVSCDebugging;
       }
 
       // Skip if noGit flag provided
