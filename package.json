@@ -1,6 +1,6 @@
 {
-  "name": "oats",
-  "version": "1.0.0",
+  "name": "@maaspiar/oats",
+  "version": "0.0.1-dev.0",
   "description": "Generate Express (Typescript) server stubs from OAS3.0",
   "author": "maaspiar",
   "license": "GNU3.0",
@@ -12,6 +12,9 @@
   },
   "engines": {
     "node": ">=14.16"
+  },
+  "repository": {
+    "url": "https://github.com/paras-verma/oats"
   },
   "dependencies": {
     "@openapitools/openapi-generator-cli": "^2.5.2",
