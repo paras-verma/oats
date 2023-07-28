@@ -23,14 +23,15 @@ async function main() {
     flags: { mongoose, service, update, noGit, noInstall, setupVSCDebugging },
   } = await parseInputs();
 
-  await scaffoldProjectRoot(appPath); // populate project root with template-core
+  if (!update) await scaffoldProjectRoot(appPath); // populate project root with template-core
 
-  let store = undefined;
+  let store: string | null = null;
   if (update) store = await modelUpdateWarning(appPath, spec, mongoose);
 
-  const generatedTypes = await generateTypes(appPath, spec, store);
-
-  if (mongoose) await generateMongooseModels(appPath, generatedTypes);
+  if ((update && store) || !update) {
+    const generatedTypes = await generateTypes(appPath, spec, store);
+    if (mongoose) await generateMongooseModels(appPath, generatedTypes);
+  }
 
   if (service !== "skip" && !update) await populateScripts(appPath, service);
 
@@ -38,7 +39,7 @@ async function main() {
 
   if (!noGit && !update) enableGit(appPath);
   if (!noInstall && !update) installDependencies(appPath);
-  if (setupVSCDebugging) setupDebugging(appPath, "vscode");
+  if (setupVSCDebugging && !update) setupDebugging(appPath, "vscode");
 
   if (!update) nextSteps(appName, noInstall, service);
 }
