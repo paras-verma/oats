@@ -106,6 +106,7 @@ export default async function generateMongooseModels(appPath: string, availableT
   });
 
   await writeFile(`${appPath}/app/models/index.ts`, indexFileContent.join("\n"), { encoding: "utf-8" });
+  logger.success("Mongoose models generated at `/models`");
 }
 
 function handleEnums(fileContent: string, enumStore: IEnumStore) {

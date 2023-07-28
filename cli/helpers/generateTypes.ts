@@ -22,7 +22,7 @@ export default async function (appPath: string, apiSpecPath: string, outputStore
     process.exit(1);
   }
 
-  logger.success("Types generated at `/models`");
+  logger.success("Types generated at `/interfaces`");
   await rm(outputStore, { force: true, recursive: true }, (error) => {
     if (!error) return;
     handleError("Failed to remove transient assets", error);

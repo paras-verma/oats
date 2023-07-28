@@ -43,4 +43,5 @@ export default async function (specFilePath: string, appPath: string, isUpdate: 
   // populate generated spec @ /api
   await mkdirp(`${appPath}/api`);
   await writeFile(`${appPath}/api/api.yaml`, dump(parsedSpec, { indent: 2, replacer: undefined }), { encoding: "utf-8" });
+  logger.success(`Routes ${isUpdate ? "updated" : "populated"} @ /controllers`);
 }

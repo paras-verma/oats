@@ -5,7 +5,7 @@ import { cleanupFileNames } from "~/utils/index.js";
 import { logger } from "~/utils/logger.js";
 import { generateTransientAssets } from "./manageTransientAssets.js";
 
-export default async function modelUpdateWarning(appPath: string, apiSpecPath: string, mongoose: boolean) {
+export default async function modelUpdateWarning(appPath: string, apiSpecPath: string, mongoose: boolean): Promise<string> {
   if (!(await exists(appPath))) {
     logger.error(`Couldn't find project at: ${appPath}`);
     process.exit(1);
@@ -33,7 +33,7 @@ export default async function modelUpdateWarning(appPath: string, apiSpecPath: s
 
   const conflicts = conflictingInterfaces.length + (mongoose ? conflictingModels.length : 0);
   if (Boolean(conflicts)) {
-    logger.warn(`${conflicts} Conflicts found!`);
+    logger.warn(`${conflicts} Potential updates found!`);
     logger.disabled(` - ${conflictingInterfaces.length} interfaces`);
     if (mongoose) logger.disabled(` - ${conflictingModels.length} mongoose models`);
   }
@@ -42,13 +42,14 @@ export default async function modelUpdateWarning(appPath: string, apiSpecPath: s
     name: "updateModels",
     type: "confirm",
     message: `Do you wish to move ahead with the update? `,
-    suffix: "This is will overwrite content in existing files",
+    suffix: "This is will overwrite content in existing files (safe)",
     default: false,
   });
 
   if (updateModels) return outputStore;
 
-  return logger.info("Aborting update...");
+  logger.info("Aborting update...");
+  return null; 
 }
 
 /**
