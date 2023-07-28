@@ -1,6 +1,6 @@
 {
   "name": "@maaspiar/oats",
-  "version": "0.0.1-dev.1",
+  "version": "0.0.1-dev.2",
   "description": "Generate Express (Typescript) server stubs from OAS3.0",
   "author": "maaspiar",
   "license": "GNU3.0",
